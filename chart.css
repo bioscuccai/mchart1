@@ -1,0 +1,126 @@
+.desc{
+  font-size: 10;
+}
+.desc-rect{
+  fill: beige;
+  stroke: black;
+  stroke-width: 2;
+}
+
+.dias-line{
+  stroke: #009DFF;
+}
+
+.overlay-dias-line{
+  /*stroke: rgb(255, 0, 122);*/
+  stroke: #D900FF;
+  stroke-width: 5px;
+  pointer-events: none;
+}
+
+.overlay-sys-line{
+  /*stroke: rgba(236, 7, 7, 0.9);*/
+  stroke: #009DFF;
+  stroke-width: 5px;
+  pointer-events: none;
+  
+}
+
+.overlay-line{
+  pointer-events: none;
+}
+
+.dias-circle{
+  fill: #009DFF;
+  stroke-width: 0;
+}
+
+.sys-circle{
+  fill: #D900FF;
+  stroke-width: 0;
+}
+
+.sys-line{
+  stroke: #D900FF;
+}
+
+.pulse-box{
+  fill: #00FFE2;
+}
+
+.axis path,
+.axis line{
+  fill: none;
+  stroke: black;
+}
+
+.line{
+  fill: none;
+  stroke-width: 2px;
+}
+
+.tick text{
+  font-size: 12px;
+}
+
+.tick line{
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.bar{
+  fill: #00FFE2;
+  stroke-width: 2;
+  stroke: #019a89;
+}
+
+.circle{
+  r: 4;
+}
+
+#brush{
+  width: 100%;
+  height: 60px;
+}
+
+.dias-area{
+  fill: rgba(252, 37, 127, 0.3);
+}
+
+.sys-area{
+  fill: rgba(255, 0, 0, 0.59);
+}
+
+.tooltip-value{
+  font-weight: bold;
+}
+
+.bar.special{
+  stroke: rgb(21, 0, 148);
+}
+
+.sys-circle.special{
+  stroke: #ac02c9;
+  stroke-width: 2;
+}
+
+.dias-circle.special{
+  stroke: #006bad;
+  stroke-width: 2;
+}
+
+.extent{
+  fill: rgba(0,0,0, 0.3);
+}
+
+.highlighted-tooltip.bar{
+  fill: #004fff;
+}
+
+.highlighted-tooltip.dias-circle{
+  stroke: #001cad;
+}
+
+.highlighted-tooltip.sys-circle{
+  stroke: #c902b6;
+}
