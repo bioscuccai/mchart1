@@ -7,25 +7,6 @@
   stroke-width: 2;
 }
 
-.dias-line{
-  stroke: #009DFF;
-}
-
-.overlay-dias-line{
-  /*stroke: rgb(255, 0, 122);*/
-  stroke: #D900FF;
-  stroke-width: 5px;
-  pointer-events: none;
-}
-
-.overlay-sys-line{
-  /*stroke: rgba(236, 7, 7, 0.9);*/
-  stroke: #009DFF;
-  stroke-width: 5px;
-  pointer-events: none;
-  
-}
-
 .overlay-line{
   pointer-events: none;
 }
@@ -34,14 +15,30 @@
   fill: #009DFF;
   stroke-width: 0;
 }
+.dias-line{
+  stroke: #009DFF;
+}
+
+.overlay-dias-line{
+  stroke: #009DFF;
+  stroke-width: 5px;
+  pointer-events: none;
+}
 
 .sys-circle{
-  fill: #D900FF;
+  fill: #00aa02;
   stroke-width: 0;
 }
 
 .sys-line{
-  stroke: #D900FF;
+  stroke: #00aa02;
+}
+.overlay-sys-line{
+
+  stroke: #00aa02;
+  stroke-width: 5px;
+  pointer-events: none;
+  
 }
 
 .pulse-box{
@@ -122,5 +119,5 @@
 }
 
 .highlighted-tooltip.sys-circle{
-  stroke: #c902b6;
+  stroke: #c902b6;í
 }

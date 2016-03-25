@@ -3,15 +3,29 @@ declare var d3:any;
 declare var _:any;
 declare var moment:any;
 declare var $:any;
-declare var data:[any];
-
+declare var pulseFlat;
+declare var sysFlat;
+declare var diasFlat;
+declare var timestampFlat;
 */
+//declare var data:[any];
+
+
 
 import * as _ from 'lodash';
 var d3=require("d3/d3.min");
 var moment=require('moment');
 var $=require('jquery');
 
+
+/*var data=_.zip(pulseFlat, sysFlat, diasFlat, timestampFlat).map(e=>{
+  return {
+    pulse: e[0],
+    sys: e[1],
+    dias: e[2],
+    timestamp: new Date(e[3]*1000)
+  };
+});*/
 
 if(_.isUndefined(d3.selection.prototype.moveToFront)){
   d3.selection.prototype.moveToFront = function() {
@@ -58,12 +72,12 @@ export default class MedChart{
       bottom: 30,
       left: 50
     },
-    sysLimit: 130,
+    sysLimit: 160,
     diasLimit: 100,
     height: 300,
     width: 640,
-    tickStart: 10,
-    tickEnd: 150,
+    tickStart: 50,
+    tickEnd: 200,
     tickInterval: 15,
     barSize: 20,
     circleSize: 3,
@@ -173,8 +187,11 @@ export default class MedChart{
       .call(this.yAxis);
     this.markLimits();
   }
+  
+  
 
   private calcTicks(){
+    return [60, 70,80, 90, 100, 110, 120, 140, 160, 180];
     let ticks=[];
     for(let i=this.opts.tickStart;i<=this.opts.tickEnd;i+=this.opts.tickInterval){
       ticks.push(i);
@@ -186,12 +203,12 @@ export default class MedChart{
   private markLimits():void{
     let diasStroke=$(`.tick text:contains(${this.opts.diasLimit})`).parent().find("line");
     diasStroke.css("stroke-width", 3);
-    diasStroke.css("stroke", "rgb(255, 9, 0)");
+    diasStroke.css("stroke", "#009DFF");
     diasStroke.css("opacity", 0.5);
     
     let sysStroke=$(`.tick text:contains(${this.opts.sysLimit})`).parent().find("line");
     sysStroke.css("stroke-width", 3);
-    sysStroke.css("stroke", "rgb(255, 9, 0)");
+    sysStroke.css("stroke", "#016602");
     sysStroke.css("opacity", 0.5);
   }
 
@@ -265,13 +282,13 @@ export default class MedChart{
     this.bars
       .enter()
         .append("rect")
-        .attr("clip-path", "url(#viewport-clip)")
-        .attr("class", d=>`bar elem-${moment(d.timestamp).unix()}`);
+        .attr("clip-path", "url(#viewport-clip)");
 
     this.bars
       .attr("x", d=>(this.xScale(d.timestamp))-(this.opts.barSize/2))
       .attr("y", d=>this.yScale(d.pulse))
       .attr("width", this.opts.barSize)
+      .attr("class", d=>`bar elem-${moment(d.timestamp).unix()}`)
       .attr("height", d=>this.opts.height-(this.yScale(d.pulse))-this.opts.margin.top-this.opts.margin.bottom);
     //exit
     this.bars.exit().remove();
@@ -309,23 +326,23 @@ export default class MedChart{
     this.sysCircle
       .enter().append("circle")
         .attr("clip-path", "url(#viewport-clip)")
-        .attr("class", d=>`circle sys-circle elem-${moment(d.timestamp).unix()}`)
         .attr("cx", d=>this.xScale(d.timestamp))
         .attr("cy", d=>this.yScale(d.sys))
         .attr("r", this.opts.circleSize);
     this.diasCircle
       .enter().append("circle")
         .attr("clip-path", "url(#viewport-clip)")
-        .attr("class", d=>`circle dias-circle elem-${moment(d.timestamp).unix()}`)
         .attr("cx", d=>this.xScale(d.timestamp))
         .attr("cy", d=>this.yScale(d.sys))
         .attr("r", this.opts.circleSize);
     
     //update
     this.sysCircle
+      .attr("class", d=>`circle sys-circle elem-${moment(d.timestamp).unix()}`)
       .attr("cx", d=>this.xScale(d.timestamp))
       .attr("cy", d=>this.yScale(d.sys));
     this.diasCircle
+      .attr("class", d=>`circle dias-circle elem-${moment(d.timestamp).unix()}`)
       .attr("cx", d=>this.xScale(d.timestamp))
       .attr("cy", d=>this.yScale(d.dias));
       
@@ -486,6 +503,7 @@ export default class MedChart{
   private setupClips():void{
     var diasClip=this.svg.append("clipPath")
       .attr("id", "dias-clip");
+
     diasClip.append("rect")
         .attr("x",this.opts.margin.left)
         .attr("y", 0)
@@ -528,8 +546,8 @@ export default class MedChart{
 
     this.overlayDiasPath=this.svg.append("path")
       .datum(this.data)
-      .attr("clip-path", "url(#sys-clip)")
-      .attr("class", "widget overlay-line overlay-sys-line")
+      .attr("clip-path", "url(#dias-clip)")
+      .attr("class", "widget overlay-line overlay-dias-line")
       .attr("fill", "none");
 
     this.overlayLineSys=d3.svg.line()
@@ -539,8 +557,8 @@ export default class MedChart{
       
     this.overlaySysPath=this.svg.append("path")
       .datum(this.data)
-      .attr("clip-path", "url(#dias-clip)")
-      .attr("class", "widget overlay-line overlay-dias-line")
+      .attr("clip-path", "url(#sys-clip)")
+      .attr("class", "widget overlay-line overlay-sys-line")
       .attr("fill", "none");
 
     this.updateOverlayLines();

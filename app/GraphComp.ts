@@ -1,4 +1,4 @@
-declare var data:any;
+declare var data:[any];
 
 import {Component, Input} from 'angular2/core';
 import * as uuid from 'node-uuid';
@@ -28,11 +28,19 @@ export default class GraphComp{
   }
   
   ngAfterContentInit(){
-    this.mc=new MedChart(data, `.chart`, '#brush', this.opts);
+    //this.mc=new MedChart([], `.chart`, '#brush', this.opts);
   }
   
   ngOnChanges(){
-    if(this.mc) this.mc.update(this.data);
+    console.log("changed from graph");
+    if(this.mc){
+      this.mc.update(this.data);
+    } else {
+      if(this.data.length!=0){
+        this.currentRange
+        this.mc=new MedChart(this.data, `.chart`, '#brush', this.opts);
+      }
+    }
   }
 }
 

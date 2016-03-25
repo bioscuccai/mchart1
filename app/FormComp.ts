@@ -25,15 +25,6 @@ export default class FormComp{
   @Input('graph-changed') graphChanged:any;
   
   constructor(public readings: ReadingService){
-    console.log("service(form)");
-    console.log(this.readings.dataStream.getValue());
-    this.readings.dataStream.subscribe(d=>{
-      console.log("changed from form");
-    });
-  }
-  
-  readingsChanged(){
-    
   }
   
   onSubmit(val){
