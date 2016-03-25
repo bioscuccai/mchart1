@@ -161,11 +161,22 @@ export default class MedChart{
 ██   ██  ██ ██  ██           ██ 
 ██   ██ ██   ██ ███████ ███████ 
 */
+  tickFormat;
   private setupAxes():void{
+    this.tickFormat = d3.time.format.multi([
+      [":%S", function(d) { return d.getSeconds(); }],
+      ["%H:%M", function(d) { return true; }],
+      ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+      ["%b %d", function(d) { return d.getDate() != 1; }],
+      ["%b", function(d) { return d.getMonth(); }],
+      ["%Y", function() { return true; }]
+    ]);
+    
     this.xAxis=d3.svg.axis()
       .scale(this.xScale)
       .tickSize(3)
       .innerTickSize(-this.opts.width)
+      .tickFormat(this.tickFormat)
       .orient("bottom");
 
     this.yAxis=d3.svg.axis()
@@ -581,6 +592,7 @@ export default class MedChart{
   private setupBrushAxes():void{
     this.brushAxis=d3.svg.axis()
       .scale(this.brushScale)
+      .tickFormat(d3.time.format("%b %d"))
       .orient("bottom");
     this.brushElem=this.brushSvg.append("g")
       .attr("id", "brush-g")
