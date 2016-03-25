@@ -457,13 +457,10 @@ export default class MedChart{
     
     this.svg
       .append("text")
-      .attr("class", "desc")
       .attr("x", startX+10)
       .attr("y", this.yScale(_.get(d, chartType))+20)
-      .text("Pulse: ")
-      .append("tspan")
-        .attr("class", "tooltip-value")
-        .text(d.pulse);
+      .attr("class", "desc tooltip-value")
+      .text(moment(d.timestamp).format("MMM DD HH:mm"));
     this.svg
       .append("text")
       .attr("class", "desc")
@@ -482,16 +479,17 @@ export default class MedChart{
       .append("tspan")
         .attr("class", "tooltip-value")
         .text(d.dias);
-    
+            
     this.svg
       .append("text")
       .attr("class", "desc")
       .attr("x", startX+10)
       .attr("y", this.yScale(_.get(d, chartType))+65)
-      .text("At: ")
+      .text("Pulse: ")
       .append("tspan")
         .attr("class", "tooltip-value")
-        .text(moment(d.timestamp).format("YYYY-MM-DD HH:mm"));
+        .text(d.pulse);
+    
   }
   /*
  ██████ ██      ██ ██████  
