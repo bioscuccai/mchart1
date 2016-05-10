@@ -29,7 +29,7 @@ lehet zoomolni.
  maximális időintervallummal és alatta egy `GrapComp`-ot magával a chart-tal.
  Ez a komponens a `ReadingService`-ből veszi az intervallumot és az aktuális kiválasztott
  intervallum alapján kéri le a megfigyeléseket amit átad a chart komponens
- outputjának
+ inputjának
 * A GraphComp `<graph-graph>` maga a chart ami a `data` inputon várja a
 megjeleníteni kívánt adatokat (más formátumban mint ahogy a mockolt data.ts-ben van!). Amennyiben az input változik a chart is frissül
 * A `ReadingService` a szerveren lévő adatokat mockolja.
@@ -56,7 +56,7 @@ csv-ből (adatok_v2.csv) tud ilyen formába konvertálni. Két paramétere van: 
 A mockadatok a példában az `App` komponens konstruktorában van behúzva mint modul és
 átadva a `ReadingService`-nek a `setSource()`-on keresztül.
 
-# Semmi sem működik de közel a demó
+# Ha a lapozás nem működik de közel a demó
 A chart <graph-graph> komponensét önállóan is lehet használni, nem kell neki a
 szerver lapozás. Ennek a komponensnek a `data` inputja a következő
 formában várja a megfigyeléseket:
