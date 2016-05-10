@@ -1,0 +1,23 @@
+{
+  "name": "chartcomp",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "fds"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery-ui": "^1.11.4",
+    "jquery": "^2.2.3"
+  }
+}
