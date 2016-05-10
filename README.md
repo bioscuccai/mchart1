@@ -68,5 +68,5 @@ formában várja a megfigyeléseket:
   timestamp: new Date(...)
 }
 ```
-# Know issues
+# Known issues
 * lapozás után a csuszka csak átméretezhető, nem huzogazható
