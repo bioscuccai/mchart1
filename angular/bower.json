@@ -1,0 +1,28 @@
+{
+  "name": "fdsfsd",
+  "authors": [
+    "fdsf"
+  ],
+  "description": "f",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "jquery-ui": "^1.12.0",
+    "angular": "^1.5.7",
+    "lodash": "^4.13.1",
+    "d3": "3.5.17",
+    "bluebird": "^3.4.1",
+    "moment": "^2.14.1"
+  }
+}
