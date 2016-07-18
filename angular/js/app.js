@@ -94,7 +94,7 @@ app.directive("chartPaginator", function($timeout, PaginatorFactory){
         });
       }
     },
-    templateUrl: "chart/templates/chart_paginator.html"
+    templateUrl: "templates/chart_paginator.html"
   };
 });
 
@@ -122,6 +122,6 @@ app.directive("chartChart", function($timeout){
         
       });
     },
-    templateUrl: 'chart/templates/chart.html'
+    templateUrl: 'templates/chart.html'
   };
 });
