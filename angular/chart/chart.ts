@@ -54,6 +54,7 @@ interface Opts{
   barSize?: number;
   circleSize?: number;
   limit?: number;
+  range?: number;
 }
 
 interface Data{
@@ -81,13 +82,16 @@ class MedChart{
     tickInterval: 15,
     barSize: 20,
     circleSize: 3,
-    limit: 200,
+    limit: 0,
     range: 72
   }
   svg:any;
+  selectorClean; brushSelectorClean;
   
   constructor(public data:[Data], public selector:string, public brushSelector:string, public opts:Opts={}){
     _.defaultsDeep(this.opts, this.defaults);
+    this.selectorClean=this.selector.replace("#", "");
+    this.brushSelectorClean=this.brushSelector.replace("#", "");
     this.data=this.parseData(data);
     this.setup();
   }
@@ -104,7 +108,6 @@ class MedChart{
     this.svg.selectAll(".line").moveToFront();
     this.svg.selectAll(".overlay-line").moveToFront();
     this.brushed();
-    
   }
   
   private parseData(data):[Data]{
@@ -112,7 +115,7 @@ class MedChart{
       return _.assign({}, d, {
         timestamp: _.isDate(d.timestamp) ? d.timestamp : moment(d.timestamp).toDate()
       });
-    }).takeRight(this.opts.limit).value();
+    }).takeRight(this.opts.limit ? this.opts.limit : data.length).value();
   }
   
   private setup():void{
@@ -154,6 +157,13 @@ class MedChart{
     this.brushScale=d3.time.scale()
       .domain(this.xExtent)
       .range([0, this.opts.width]);
+  }
+  
+  private calcInitialExtent():any{
+    return [
+      moment(_.last(this.data).timestamp).subtract(this.opts.range, "hours").toDate(),
+      _.last(this.data).timestamp
+    ];
   }
   /*
  █████  ██   ██ ███████ ███████ 
@@ -203,7 +213,7 @@ class MedChart{
   
 
   private calcTicks(){
-    return [60, 70,80, 90, 100, 110, 120, 140, 160, 180];
+    //return [60, 70,80, 90, 100, 110, 120, 140, 160, 180];
     let ticks=[];
     for(let i=this.opts.tickStart;i<=this.opts.tickEnd;i+=this.opts.tickInterval){
       ticks.push(i);
@@ -211,6 +221,8 @@ class MedChart{
     ticks=_([...ticks, this.opts.diasLimit, this.opts.sysLimit]).sortBy().uniq().value();
     return ticks;
   }
+  
+  brushG;
 
   private markLimits():void{
     let diasStroke=$(`.tick text:contains(${this.opts.diasLimit})`).parent().find("line");
@@ -232,8 +244,10 @@ class MedChart{
     
     this.brushScale.domain(this.xExtent)
       .range([0, this.opts.width]);
-    d3.select("#brush-g").call(this.brushAxis);
-    
+    //this.brushG.call(this.brushAxis);
+    //d3.select(`#brush-g`).call(this.brushAxis);
+    d3.select(`${this.brushSelector}-g`).call(this.brushAxis);
+    //d3.select(`#brush-g`).call(this.brushAxis);
   }
   /*
 ██      ██ ███    ██ ███████ ███████ 
@@ -256,14 +270,14 @@ class MedChart{
     this.sysPath=this.svg.append("path")
       .datum(this.data)
       .attr("d", this.lineSys)
-      .attr("clip-path", "url(#viewport-clip)")
+      .attr("clip-path", `url(#${this.selectorClean}-viewport-clip)`)
       .attr("class", "widget line sys-line")
       .attr("stroke-width", "3px")
       .attr("fill", "none");
     this.diasPath=this.svg.append("path")
       .datum(this.data)
       .attr("d", this.lineDias)
-      .attr("clip-path", "url(#viewport-clip)")
+      .attr("clip-path", `url(#${this.selectorClean}-viewport-clip)`)
       .attr("class", "widget line dias-line")
       .attr("stroke-width", "3px")
       .attr("fill", "none");
@@ -294,13 +308,13 @@ class MedChart{
     this.bars
       .enter()
         .append("rect")
-        .attr("clip-path", "url(#viewport-clip)");
+        .attr("clip-path", `url(#${this.selectorClean}-viewport-clip)`);
 
     this.bars
       .attr("x", d=>(this.xScale(d.timestamp))-(this.opts.barSize/2))
       .attr("y", d=>this.yScale(d.pulse))
       .attr("width", this.opts.barSize)
-      .attr("class", d=>`bar elem-${moment(d.timestamp).unix()}`)
+      .attr("class", d=>`bar elem-${this.selectorClean}-${moment(d.timestamp).unix()}`)
       .attr("height", d=>this.opts.height-(this.yScale(d.pulse))-this.opts.margin.top-this.opts.margin.bottom);
     //exit
     this.bars.exit().remove();
@@ -337,24 +351,24 @@ class MedChart{
       .data(this.data);
     this.sysCircle
       .enter().append("circle")
-        .attr("clip-path", "url(#viewport-clip)")
+        .attr("clip-path", `url(#${this.selectorClean}-viewport-clip)`)
         .attr("cx", d=>this.xScale(d.timestamp))
         .attr("cy", d=>this.yScale(d.sys))
         .attr("r", this.opts.circleSize);
     this.diasCircle
       .enter().append("circle")
-        .attr("clip-path", "url(#viewport-clip)")
+        .attr("clip-path", `url(#${this.selectorClean}-viewport-clip)`)
         .attr("cx", d=>this.xScale(d.timestamp))
         .attr("cy", d=>this.yScale(d.sys))
         .attr("r", this.opts.circleSize);
     
     //update
     this.sysCircle
-      .attr("class", d=>`circle sys-circle elem-${moment(d.timestamp).unix()}`)
+      .attr("class", d=>`circle sys-circle elem-${this.selectorClean}-${moment(d.timestamp).unix()}`)
       .attr("cx", d=>this.xScale(d.timestamp))
       .attr("cy", d=>this.yScale(d.sys));
     this.diasCircle
-      .attr("class", d=>`circle dias-circle elem-${moment(d.timestamp).unix()}`)
+      .attr("class", d=>`circle dias-circle elem-${this.selectorClean}-${moment(d.timestamp).unix()}`)
       .attr("cx", d=>this.xScale(d.timestamp))
       .attr("cy", d=>this.yScale(d.dias));
       
@@ -372,20 +386,28 @@ class MedChart{
   brushScale; timeBrush; brushSvg; brushAxis; brushElem;
   private setupBrush():void{
     this.brushScale=d3.time.scale().domain(this.xExtent).range([0, this.opts.width]);
+
     
     this.timeBrush=d3.svg.brush()
       .x(this.brushScale)
       .extent(this.xExtent)
       .on("brush", this.brushed.bind(this));
-    this.brushSvg=d3.select("#brush")
+
+    //this.brushSvg=d3.select("#brush")
+    this.brushSvg=d3.select(this.brushSelector)
       .append("svg")
       .attr("heigth", "100%")
       .attr("width", "100%");
-      this.timeBrush.extent(this.initialExtent);
-    let brushG=this.brushSvg.append("g")
+    this.timeBrush.extent(this.initialExtent);
+      
+    this.brushG=this.brushSvg.append("g")
       .attr("id", "brushG")
       .call(this.timeBrush)
       .selectAll("rect").attr("height", 50);
+  }
+  
+  private sameExtent(ex1:any, ex2:any){
+    return ex1[0]===ex2[0] && ex1[1]===ex2[1];
   }
   
   private brushed():void{
@@ -437,17 +459,17 @@ class MedChart{
   }
   
   private removeTooltip(d){
-    d3.selectAll(`.elem-${moment(d.timestamp).unix()}`).classed("highlighted-tooltip", false);
+    d3.selectAll(`.elem-${this.selectorClean}-${moment(d.timestamp).unix()}`).classed("highlighted-tooltip", false);
     this.svg.selectAll('.desc').remove();
-    this.svg.selectAll(`.circle.elem-${moment(d.timestamp).unix()}`)
+    this.svg.selectAll(`.circle.elem-${this.selectorClean}-${moment(d.timestamp).unix()}`)
       .attr("r", this.opts.circleSize);
   }
   
   private  displayTooltip(d, chartType, event):void{
     let startX, startY;
     
-    this.svg.selectAll(`.elem-${moment(d.timestamp).unix()}`).classed("highlighted-tooltip", true);
-    this.svg.selectAll(`.circle.elem-${moment(d.timestamp).unix()}`)
+    this.svg.selectAll(`.elem-${this.selectorClean}-${moment(d.timestamp).unix()}`).classed("highlighted-tooltip", true);
+    this.svg.selectAll(`.circle.elem-${this.selectorClean}-${moment(d.timestamp).unix()}`)
       .attr("r", this.opts.circleSize*2);
     
     if(event.pageX+130<this.opts.width){
@@ -532,7 +554,7 @@ class MedChart{
   
   private setupViewboardClip():void{
     this.svg.append("clipPath")
-      .attr("id", "viewport-clip")
+      .attr("id", `${this.selectorClean}-viewport-clip`)
       .append("rect")
         .attr("x", this.opts.margin.left)
         .attr("y", this.opts.margin.top)
@@ -596,7 +618,8 @@ class MedChart{
       .tickFormat(d3.time.format("%b %d"))
       .orient("bottom");
     this.brushElem=this.brushSvg.append("g")
-      .attr("id", "brush-g")
+      .attr("id", `${this.brushSelectorClean}-g`)
+      //.attr("id", "brush-g")
       .call(this.brushAxis);
   }
   

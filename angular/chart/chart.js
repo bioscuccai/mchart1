@@ -1,18 +1,3 @@
-//declare var data:[any];
-/*
-import * as _ from 'lodash';
-var d3=require("d3/d3.min");
-var moment=require('moment');
-var $=require('jquery');
-*/
-/*var data=_.zip(pulseFlat, sysFlat, diasFlat, timestampFlat).map(e=>{
-  return {
-    pulse: e[0],
-    sys: e[1],
-    dias: e[2],
-    timestamp: new Date(e[3]*1000)
-  };
-});*/
 if (_.isUndefined(d3.selection.prototype.moveToFront)) {
     d3.selection.prototype.moveToFront = function () {
         return this.each(function () {
@@ -27,7 +12,6 @@ var MedChart = (function () {
         this.selector = selector;
         this.brushSelector = brushSelector;
         this.opts = opts;
-        //class MedChart{
         this.defaults = {
             margin: {
                 top: 20,
@@ -44,10 +28,12 @@ var MedChart = (function () {
             tickInterval: 15,
             barSize: 20,
             circleSize: 3,
-            limit: 200,
+            limit: 0,
             range: 72
         };
         _.defaultsDeep(this.opts, this.defaults);
+        this.selectorClean = this.selector.replace("#", "");
+        this.brushSelectorClean = this.brushSelector.replace("#", "");
         this.data = this.parseData(data);
         this.setup();
     }
@@ -58,7 +44,6 @@ var MedChart = (function () {
         this.updateOverlayLines();
         this.updateCircles();
         this.setupTooltips();
-        //setupOverflowBoxes();
         this.updateAxes();
         this.svg.selectAll(".line").moveToFront();
         this.svg.selectAll(".overlay-line").moveToFront();
@@ -69,7 +54,7 @@ var MedChart = (function () {
             return _.assign({}, d, {
                 timestamp: _.isDate(d.timestamp) ? d.timestamp : moment(d.timestamp).toDate()
             });
-        }).takeRight(this.opts.limit).value();
+        }).takeRight(this.opts.limit ? this.opts.limit : data.length).value();
     };
     MedChart.prototype.setup = function () {
         this.setupChart();
@@ -101,6 +86,12 @@ var MedChart = (function () {
         this.brushScale = d3.time.scale()
             .domain(this.xExtent)
             .range([0, this.opts.width]);
+    };
+    MedChart.prototype.calcInitialExtent = function () {
+        return [
+            moment(_.last(this.data).timestamp).subtract(this.opts.range, "hours").toDate(),
+            _.last(this.data).timestamp
+        ];
     };
     MedChart.prototype.setupAxes = function () {
         this.tickFormat = d3.time.format.multi([
@@ -136,7 +127,6 @@ var MedChart = (function () {
         this.markLimits();
     };
     MedChart.prototype.calcTicks = function () {
-        return [60, 70, 80, 90, 100, 110, 120, 140, 160, 180];
         var ticks = [];
         for (var i = this.opts.tickStart; i <= this.opts.tickEnd; i += this.opts.tickInterval) {
             ticks.push(i);
@@ -160,7 +150,7 @@ var MedChart = (function () {
         this.xExtent = [_.first(this.data).timestamp, _.last(this.data).timestamp];
         this.brushScale.domain(this.xExtent)
             .range([0, this.opts.width]);
-        d3.select("#brush-g").call(this.brushAxis);
+        d3.select(this.brushSelector + "-g").call(this.brushAxis);
     };
     MedChart.prototype.setupLines = function () {
         var _this = this;
@@ -175,14 +165,14 @@ var MedChart = (function () {
         this.sysPath = this.svg.append("path")
             .datum(this.data)
             .attr("d", this.lineSys)
-            .attr("clip-path", "url(#viewport-clip)")
+            .attr("clip-path", "url(#" + this.selectorClean + "-viewport-clip)")
             .attr("class", "widget line sys-line")
             .attr("stroke-width", "3px")
             .attr("fill", "none");
         this.diasPath = this.svg.append("path")
             .datum(this.data)
             .attr("d", this.lineDias)
-            .attr("clip-path", "url(#viewport-clip)")
+            .attr("clip-path", "url(#" + this.selectorClean + "-viewport-clip)")
             .attr("class", "widget line dias-line")
             .attr("stroke-width", "3px")
             .attr("fill", "none");
@@ -201,18 +191,16 @@ var MedChart = (function () {
     MedChart.prototype.updateBar = function () {
         var _this = this;
         this.bars = this.svg.selectAll(".bar").data(this.data);
-        //create
         this.bars
             .enter()
             .append("rect")
-            .attr("clip-path", "url(#viewport-clip)");
+            .attr("clip-path", "url(#" + this.selectorClean + "-viewport-clip)");
         this.bars
             .attr("x", function (d) { return (_this.xScale(d.timestamp)) - (_this.opts.barSize / 2); })
             .attr("y", function (d) { return _this.yScale(d.pulse); })
             .attr("width", this.opts.barSize)
-            .attr("class", function (d) { return ("bar elem-" + moment(d.timestamp).unix()); })
+            .attr("class", function (d) { return ("bar elem-" + _this.selectorClean + "-" + moment(d.timestamp).unix()); })
             .attr("height", function (d) { return _this.opts.height - (_this.yScale(d.pulse)) - _this.opts.margin.top - _this.opts.margin.bottom; });
-        //exit
         this.bars.exit().remove();
     };
     MedChart.prototype.currentBarWidth = function () {
@@ -238,26 +226,24 @@ var MedChart = (function () {
             .data(this.data);
         this.sysCircle
             .enter().append("circle")
-            .attr("clip-path", "url(#viewport-clip)")
+            .attr("clip-path", "url(#" + this.selectorClean + "-viewport-clip)")
             .attr("cx", function (d) { return _this.xScale(d.timestamp); })
             .attr("cy", function (d) { return _this.yScale(d.sys); })
             .attr("r", this.opts.circleSize);
         this.diasCircle
             .enter().append("circle")
-            .attr("clip-path", "url(#viewport-clip)")
+            .attr("clip-path", "url(#" + this.selectorClean + "-viewport-clip)")
             .attr("cx", function (d) { return _this.xScale(d.timestamp); })
             .attr("cy", function (d) { return _this.yScale(d.sys); })
             .attr("r", this.opts.circleSize);
-        //update
         this.sysCircle
-            .attr("class", function (d) { return ("circle sys-circle elem-" + moment(d.timestamp).unix()); })
+            .attr("class", function (d) { return ("circle sys-circle elem-" + _this.selectorClean + "-" + moment(d.timestamp).unix()); })
             .attr("cx", function (d) { return _this.xScale(d.timestamp); })
             .attr("cy", function (d) { return _this.yScale(d.sys); });
         this.diasCircle
-            .attr("class", function (d) { return ("circle dias-circle elem-" + moment(d.timestamp).unix()); })
+            .attr("class", function (d) { return ("circle dias-circle elem-" + _this.selectorClean + "-" + moment(d.timestamp).unix()); })
             .attr("cx", function (d) { return _this.xScale(d.timestamp); })
             .attr("cy", function (d) { return _this.yScale(d.dias); });
-        //remove
         this.sysCircle.exit().remove();
         this.diasCircle.exit().remove();
     };
@@ -267,15 +253,18 @@ var MedChart = (function () {
             .x(this.brushScale)
             .extent(this.xExtent)
             .on("brush", this.brushed.bind(this));
-        this.brushSvg = d3.select("#brush")
+        this.brushSvg = d3.select(this.brushSelector)
             .append("svg")
             .attr("heigth", "100%")
             .attr("width", "100%");
         this.timeBrush.extent(this.initialExtent);
-        var brushG = this.brushSvg.append("g")
+        this.brushG = this.brushSvg.append("g")
             .attr("id", "brushG")
             .call(this.timeBrush)
             .selectAll("rect").attr("height", 50);
+    };
+    MedChart.prototype.sameExtent = function (ex1, ex2) {
+        return ex1[0] === ex2[0] && ex1[1] === ex2[1];
     };
     MedChart.prototype.brushed = function () {
         var _this = this;
@@ -293,13 +282,6 @@ var MedChart = (function () {
         this.overlaySysPath.attr("d", this.lineSys);
         this.overlayDiasPath.attr("d", this.lineDias);
     };
-    /*
-  ████████  ██████   ██████  ██   ████████ ██ ██████
-     ██    ██    ██ ██    ██ ██      ██    ██ ██   ██
-     ██    ██    ██ ██    ██ ██      ██    ██ ██████
-     ██    ██    ██ ██    ██ ██      ██    ██ ██
-     ██     ██████   ██████  ███████ ██    ██ ██
-  */
     MedChart.prototype.setupTooltips = function () {
         var _this = this;
         this.svg.selectAll("circle.sys-circle")
@@ -320,15 +302,15 @@ var MedChart = (function () {
             .on("mouseout", function (d) { return _this.removeTooltip(d); });
     };
     MedChart.prototype.removeTooltip = function (d) {
-        d3.selectAll(".elem-" + moment(d.timestamp).unix()).classed("highlighted-tooltip", false);
+        d3.selectAll(".elem-" + this.selectorClean + "-" + moment(d.timestamp).unix()).classed("highlighted-tooltip", false);
         this.svg.selectAll('.desc').remove();
-        this.svg.selectAll(".circle.elem-" + moment(d.timestamp).unix())
+        this.svg.selectAll(".circle.elem-" + this.selectorClean + "-" + moment(d.timestamp).unix())
             .attr("r", this.opts.circleSize);
     };
     MedChart.prototype.displayTooltip = function (d, chartType, event) {
         var startX, startY;
-        this.svg.selectAll(".elem-" + moment(d.timestamp).unix()).classed("highlighted-tooltip", true);
-        this.svg.selectAll(".circle.elem-" + moment(d.timestamp).unix())
+        this.svg.selectAll(".elem-" + this.selectorClean + "-" + moment(d.timestamp).unix()).classed("highlighted-tooltip", true);
+        this.svg.selectAll(".circle.elem-" + this.selectorClean + "-" + moment(d.timestamp).unix())
             .attr("r", this.opts.circleSize * 2);
         if (event.pageX + 130 < this.opts.width) {
             startX = this.xScale(d.timestamp);
@@ -381,13 +363,6 @@ var MedChart = (function () {
             .attr("class", "tooltip-value")
             .text(d.pulse);
     };
-    /*
-   ██████ ██      ██ ██████
-  ██      ██      ██ ██   ██
-  ██      ██      ██ ██████
-  ██      ██      ██ ██
-   ██████ ███████ ██ ██
-  */
     MedChart.prototype.setupClips = function () {
         var diasClip = this.svg.append("clipPath")
             .attr("id", "dias-clip");
@@ -406,7 +381,7 @@ var MedChart = (function () {
     };
     MedChart.prototype.setupViewboardClip = function () {
         this.svg.append("clipPath")
-            .attr("id", "viewport-clip")
+            .attr("id", this.selectorClean + "-viewport-clip")
             .append("rect")
             .attr("x", this.opts.margin.left)
             .attr("y", this.opts.margin.top)
@@ -443,20 +418,13 @@ var MedChart = (function () {
             .datum(this.data)
             .attr("d", this.overlayLineDias);
     };
-    /*
-    ██████  ██████  ██    ██ ███████ ██   ██      █████  ██   ██ ███████ ███████
-    ██   ██ ██   ██ ██    ██ ██      ██   ██     ██   ██  ██ ██  ██      ██
-    ██████  ██████  ██    ██ ███████ ███████     ███████   ███   █████   ███████
-    ██   ██ ██   ██ ██    ██      ██ ██   ██     ██   ██  ██ ██  ██           ██
-    ██████  ██   ██  ██████  ███████ ██   ██     ██   ██ ██   ██ ███████ ███████
-    */
     MedChart.prototype.setupBrushAxes = function () {
         this.brushAxis = d3.svg.axis()
             .scale(this.brushScale)
             .tickFormat(d3.time.format("%b %d"))
             .orient("bottom");
         this.brushElem = this.brushSvg.append("g")
-            .attr("id", "brush-g")
+            .attr("id", this.brushSelectorClean + "-g")
             .call(this.brushAxis);
     };
     MedChart.prototype.setupChart = function () {
@@ -465,15 +433,4 @@ var MedChart = (function () {
             .attr("height", this.opts.height);
     };
     return MedChart;
-})();
-/*
-let mc=new MedChart(data, ".chart", "b");
-function changeData(){
-  mc.update([...mc.data, {
-    pulse: _.random(10, 50),
-    sys: _.random(10, 50),
-    dias: _.random(10, 50),
-    timestamp: moment(_.last(mc.data).timestamp).add(4, "hours").toDate()
-  }]);
-}
-*/
+}());

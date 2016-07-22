@@ -5,11 +5,11 @@
   </div>
   <div>
     <div style='float: left; padding-right: 15px;'>{{range.start|date}}</div>
-    <div class="slider" style="width: 400px; float: left"></div>
+    <div id="{{chartPaginatorId}}" style="width: 400px; float: left"></div>
     <div style='float: left; padding-left: 15px;'>{{range.end|date}}</div>
     <br style='clear: both'>
   </div>
   <div>
-    <chart-chart data="currentData"></graph-graph>
+    <chart-chart data="currentData"></chart-chart>
   </div>
 </div>
